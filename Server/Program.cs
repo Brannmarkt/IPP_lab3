@@ -1,51 +1,40 @@
-﻿using System.Net;
-using Common.Contracts;
-using Common.Models;
+﻿using Autofac;
 using Microsoft.Extensions.Logging;
 using Server;
+using Server.Persistence;
 using Server.Repositories;
 using Server.Strategies;
 
-const int Port = ConnectionInformation.ServerPort;
+var builder = new ContainerBuilder();
+ConfigureContainer(builder);
+IContainer container = builder.Build();
 
-using var loggerFactory = LoggerFactory.Create(builder =>
+using (var scope = container.BeginLifetimeScope())
 {
-    builder
-        .AddFilter("Microsoft", LogLevel.Warning)
-        .AddFilter("System", LogLevel.Warning)
-        .AddFilter("NonHostConsoleApp.Program", LogLevel.Debug)
-        .AddConsole();
-});
-ILogger logger = loggerFactory.CreateLogger<Program>();
+    var server = scope.Resolve<IStudentServer>();
+    server.StartListen();
+}
 
-var names = new List<string>
+static void ConfigureLogging(ILoggingBuilder log)
 {
-    "Aleksandra Kovalenko",
-    "Ivan Petrov",
-    "Katarina Novak",
-    "Andrey Pavlov",
-    "Elena Kuznetsova",
-    "Pavel Sokolov",
-    "Olga Shirokova",
-    "Viktoriya Ivanova",
-    "Sergei Gorbachev",
-    "Nataliya Belyaeva",
-    "Dmitriy Tarasov",
-    "Marina Volkova",
-    "Anton Popov",
-    "Anastasia Orlova",
-    "Roman Gromov"
-};
+    log.ClearProviders();
+    log.SetMinimumLevel(LogLevel.Debug);
+    log.AddConsole();
+}
+static void ConfigureContainer(ContainerBuilder builder)
+{
+    builder.Register(handler => LoggerFactory.Create(ConfigureLogging))
+        .As<ILoggerFactory>()
+        .SingleInstance()
+        .AutoActivate();
 
-var students = Enumerable.Range(0, 15).Select(x =>
-{
-    return new Student
-    {
-        Id = Guid.NewGuid(), FullName = names[x], Age = Random.Shared.Next(16, 24),
-        GradePointAverage = Random.Shared.Next(3, 6)
-    };
-}).ToList();
-var repository = new StudentRepository(students);
-var studentRequestHandler = new StudentRequestHandler(loggerFactory.CreateLogger<StudentRequestHandler>(), repository);
-var server = new StudentServer(IPAddress.Any, Port, loggerFactory.CreateLogger<StudentServer>(), studentRequestHandler);
-server.StartListen();
+    builder.RegisterGeneric(typeof(Logger<>))
+        .As(typeof(ILogger<>))
+        .SingleInstance();
+    
+    // other registrations
+    builder.RegisterType<StudentRepository>().As<IStudentRepository>();
+    builder.RegisterType<DataSource>().AsSelf().SingleInstance();
+    builder.RegisterType<StudentRequestHandler>().As<IStudentRequestHandlerStrategy>();
+    builder.RegisterType<StudentServer>().As<IStudentServer>();
+}

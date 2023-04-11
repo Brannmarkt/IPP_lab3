@@ -8,23 +8,22 @@ using Server.Strategies;
 
 namespace Server;
 
-public class StudentServer
+public class StudentServer : IStudentServer
 {
-    private readonly int _port;
-    private readonly IPAddress _localAddr;
+    private const int Port = ConnectionInformation.ServerPort;
+    private readonly IPAddress _localAddr = IPAddress.Any;
+    
     private readonly ILogger<StudentServer> _logger;
     private readonly IStudentRequestHandlerStrategy _studentRequestHandler;
-    public StudentServer(IPAddress ipAddress, int port, ILogger<StudentServer> logger, IStudentRequestHandlerStrategy studentRequestHandler)
+    public StudentServer(ILogger<StudentServer> logger, IStudentRequestHandlerStrategy studentRequestHandler)
     {
-        _localAddr = ipAddress;
-        _port = port;
         _logger = logger;
         _studentRequestHandler = studentRequestHandler;
     }
 
     public void StartListen()
     {
-        var tcpListener = new TcpListener(_localAddr, _port);
+        var tcpListener = new TcpListener(_localAddr, Port);
 
         try
         {
