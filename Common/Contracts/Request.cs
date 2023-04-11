@@ -7,7 +7,7 @@ public static class Request
         private const string Base = "Students/";
 
         public const string GetAll = Base + "GetAll";
-        public const string GetOver18 = Base + "GetAll";
+        public const string GetOver18 = Base + "GetOver18";
         public const string GetFellows = Base + "GetFellows";
     }
 }

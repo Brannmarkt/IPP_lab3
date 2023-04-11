@@ -1,6 +1,6 @@
 using Common.Contracts;
+using Common.Models;
 using Microsoft.Extensions.Logging;
-using Server.Models;
 using Server.Repositories;
 
 namespace Server.Strategies;

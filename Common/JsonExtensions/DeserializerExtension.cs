@@ -5,7 +5,7 @@ namespace Common.JsonExtensions;
 
 public static class DeserializerExtension
 {
-    public static T Serialize<T>(this string toDeserialize)
+    public static T Deserialize<T>(this string toDeserialize)
         where T : class
     {
         T deserializedObject = JsonSerializer.Deserialize<T>(toDeserialize);

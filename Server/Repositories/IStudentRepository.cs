@@ -1,4 +1,4 @@
-using Server.Models;
+using Common.Models;
 
 namespace Server.Repositories;
 

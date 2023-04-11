@@ -1,8 +1,9 @@
 using System.Net;
 using System.Net.Sockets;
+using Common.Contracts;
 using Common.JsonExtensions;
+using Common.Models;
 using Microsoft.Extensions.Logging;
-using Server.Models;
 using Server.Strategies;
 
 namespace Server;
@@ -55,7 +56,15 @@ public class StudentServer
 
                 // Process the data sent by the client.
                 var result = _studentRequestHandler.HandleRequest(request);
-                string response = result.Serialize<IEnumerable<Student>>();
+                string response = string.Empty;
+                if (result == null)
+                {
+                    response = ErrorMessages.InvalidRequest;
+                }
+                else
+                {
+                    response = result.Serialize<IEnumerable<Student>>();
+                }
                     
                 byte[] msg = System.Text.Encoding.UTF8.GetBytes(response);
 

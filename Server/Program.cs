@@ -1,8 +1,8 @@
 ﻿using System.Net;
 using Common.Contracts;
+using Common.Models;
 using Microsoft.Extensions.Logging;
 using Server;
-using Server.Models;
 using Server.Repositories;
 using Server.Strategies;
 
@@ -18,12 +18,34 @@ using var loggerFactory = LoggerFactory.Create(builder =>
 });
 ILogger logger = loggerFactory.CreateLogger<Program>();
 
-var studentRepository = new StudentRepository(new List<Student>
+var names = new List<string>
 {
-    new Student { Id = Guid.NewGuid(), FullName = "Vitaliy Minaev", Age = 19, GradePointAverage = 5},
-    new Student { Id = Guid.NewGuid(), FullName = "Aleksey Kutniy", Age = 20, GradePointAverage = 5},
-    new Student { Id = Guid.NewGuid(), FullName = "Michail Kutniy", Age = 20, GradePointAverage = 5}
-});
-var studentRequestHandler = new StudentRequestHandler(loggerFactory.CreateLogger<StudentRequestHandler>(), studentRepository);
+    "Aleksandra Kovalenko",
+    "Ivan Petrov",
+    "Katarina Novak",
+    "Andrey Pavlov",
+    "Elena Kuznetsova",
+    "Pavel Sokolov",
+    "Olga Shirokova",
+    "Viktoriya Ivanova",
+    "Sergei Gorbachev",
+    "Nataliya Belyaeva",
+    "Dmitriy Tarasov",
+    "Marina Volkova",
+    "Anton Popov",
+    "Anastasia Orlova",
+    "Roman Gromov"
+};
+
+var students = Enumerable.Range(0, 15).Select(x =>
+{
+    return new Student
+    {
+        Id = Guid.NewGuid(), FullName = names[x], Age = Random.Shared.Next(16, 24),
+        GradePointAverage = Random.Shared.Next(3, 6)
+    };
+}).ToList();
+var repository = new StudentRepository(students);
+var studentRequestHandler = new StudentRequestHandler(loggerFactory.CreateLogger<StudentRequestHandler>(), repository);
 var server = new StudentServer(IPAddress.Any, Port, loggerFactory.CreateLogger<StudentServer>(), studentRequestHandler);
 server.StartListen();

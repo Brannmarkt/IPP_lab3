@@ -1,5 +1,5 @@
+using Common.Models;
 using Microsoft.Extensions.Logging;
-using Server.Models;
 
 namespace Server.Repositories;
 
